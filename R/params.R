@@ -1,6 +1,6 @@
 get_vp_params <- function(parameter){
     parameters <- list(
-        list(parameter = 'dens', name = 'Volume density', units = '#/km3'),
+        list(parameter = 'dens', name = 'Bird density', units = '#/km3'),
         list(parameter = 'eta', name = 'Reflectivity eta', units = 'cm2/km3'),
         list(parameter = 'dbz', name = 'Reflectivity factor', units = 'dBZe'),
         list(parameter = 'w', name = 'Vertical velocity', units = 'm/s'),

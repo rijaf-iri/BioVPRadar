@@ -4,10 +4,10 @@
 \alias{get_vpts}
 \title{Vertical profile time series.}
 \usage{
-get_vpts(data_dir, query)
+get_vpts(data_info, query)
 }
 \arguments{
-\item{data_dir}{character, full path to the directory containing the vertical profiles data.
+\item{data_info}{named list, list containing the vertical profiles dataset information.
 To be replaced by a connection to postgresql.}
 
 \item{query}{named list, user query \code{list(parameter, startTime, endTime)}.}

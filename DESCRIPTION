@@ -10,5 +10,11 @@ NeedsCompilation: no
 Imports: 
     jsonlite,
     bioRad,
-    reshape2, 
+    reshape2,
+    ncdf4,
+    sf,
+    sp,
+    raster,
+    RCurl,
+    methods,
 RoxygenNote: 7.3.2

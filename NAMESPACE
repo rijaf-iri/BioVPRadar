@@ -2,3 +2,4 @@
 export(get_vp)
 export(get_vpts)
 export(get_vtip)
+export(get_vpts_image)

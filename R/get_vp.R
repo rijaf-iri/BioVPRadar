@@ -47,6 +47,47 @@ get_vpts <- function(data_info, query){
     list(status = 0, data = json)
 }
 
+#' Image vertical profile time series.
+#'
+#' Plot vertical profile time series.
+#' 
+#' @param data_info named list, list containing the vertical profiles dataset information.
+#' To be replaced by a connection to postgresql.
+#' @param query named list, user query \code{list(parameter, startTime, endTime)}.
+#'
+#' @return A named list, \code{list(status, data)}
+#' 
+#' @export
+
+get_vpts_image <- function(data_info, query){
+    vp_files <- get_vp_files_path(data_info,
+                            query$startTime,
+                            query$endTime)
+    if(is.null(vp_files)){
+        msg <- 'No data found'
+        return(list(status = -1, message = msg))
+    }
+    vpts <- bioRad::read_vpts(vp_files)
+    vpts <- bioRad::regularize_vpts(vpts)
+    
+    pngfile <- tempfile()
+    grDevices::png(pngfile, width = 800, height = 450)
+    plot(
+        vpts, quantity = query$parameter,
+        xlab = '', ylab = 'Altitude [m]', 
+        cex.lab = 1.5, cex.axis = 1.2,
+        cex.main = 1.5, font.main = 2
+    )
+    grDevices::dev.off()
+
+    bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])
+    bin_data <- RCurl::base64Encode(bin_data, 'txt')
+    png_base64 <- paste0('data:image/png;base64,', bin_data)
+    unlink(pngfile)
+
+    list(status = 0, data = png_base64)
+}
+
 #' Vertical and time integration of profiles.
 #'
 #' Get the vertical and time integration of profiles.

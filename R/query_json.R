@@ -4,7 +4,7 @@ get_vp_json <- function(vp, parameter){
     out <- list(time = df_vp$datetime[1], name = info$name, units = info$units,
                 day = df_vp$day[1], sunrise = df_vp$sunrise[1], sunset = df_vp$sunset[1],
                 height = df_vp$height, parameter = df_vp[, parameter],
-                ff = df_vp$ff, dd = df_vp$dd)
+                ff = df_vp$ff, dd = df_vp$dd, query_par = parameter)
     jsonlite::toJSON(out, na = 'null', auto_unbox = TRUE)
 }
 
@@ -35,7 +35,8 @@ get_vpts_json <- function(vpts, parameter){
     out <- list(name = info$name, units = info$units,
                 times = times, height = height, 
                 parameter = param, ff = ff, dd = dd,
-                sunrise = sunrise, sunset = sunset)
+                sunrise = sunrise, sunset = sunset,
+                query_par = parameter)
 
     jsonlite::toJSON(out, na = 'null', auto_unbox = TRUE)
 }
@@ -52,6 +53,7 @@ get_vtip_json <- function(vpts, parameter){
     out <- list(name = info$name, units = info$units,
                 height = vpi$height, times = vpi$datetime,
                 parameter = vpi[, parameter], ff = vpi$ff, dd = vpi$dd,
-                day = day, sunrise = sunrise, sunset = sunset)
+                day = day, sunrise = sunrise, sunset = sunset,
+                query_par = parameter)
     jsonlite::toJSON(out, na = 'null', auto_unbox = TRUE)
 }

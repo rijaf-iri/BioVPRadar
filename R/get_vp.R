@@ -74,7 +74,8 @@ get_vpts_image <- function(data_info, query){
     grDevices::png(pngfile, width = 900, height = 450)
     plot(
         vpts, quantity = query$parameter,
-        xlab = '', ylab = 'Altitude [m]', 
+        xlab = '', ylab = 'Altitude [m]',
+        ylim = c(1600, 5020), 
         cex.lab = 1.5, cex.axis = 1.2,
         cex.main = 1.5, font.main = 2
     )

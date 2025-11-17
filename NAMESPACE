@@ -1,3 +1,8 @@
+export(create_bioDBConnection)
+export(create_bioDBRadar)
+export(verify_bioDBRadar)
+export(add_new_radar)
+export(compute_vp)
 
 export(get_vp)
 export(get_vpts)

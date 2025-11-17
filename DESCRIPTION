@@ -1,5 +1,5 @@
 Package: BioVPRadar
-Version: 1.0
+Version: 1.1
 Title: Vertical Profiles
 Description: Interface to bioRad to compute the vertical profiles and spatial estimates of vertically integrated density. Used by the API service BioAPIRadar to serve user request.
 Author: Rija Faniriantsoa <rijaf@iri.columbia.edu>
@@ -10,6 +10,7 @@ NeedsCompilation: no
 Imports: 
     jsonlite,
     bioRad,
+    vol2birdR,
     reshape2,
     ncdf4,
     sf,
@@ -17,4 +18,6 @@ Imports:
     raster,
     RCurl,
     methods,
+    DBI,
+    RPostgres,
 RoxygenNote: 7.3.2

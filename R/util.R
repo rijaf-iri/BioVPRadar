@@ -118,7 +118,9 @@ get_data_file_path <- function(data_info, time_str){
     date_files <- as.POSIXct(
         date_files, format = '%Y%m%d%H%M%S', tz = 'UTC'
     )
-    it <- which.min(abs(date_files - time_req))
+    it <- which.min(
+        abs(difftime(date_files, time_req, units = 'secs'))
+    )
     file_path <- file.path(data_dir, data_files[it])
 
     return(file_path)
@@ -182,4 +184,39 @@ get_data_files_list <- function(data_info, start_time, end_time){
     if(all(inul)) return(NULL)
 
     return(list_out[!inul])
+}
+
+# from old version, vp stored in csv files
+get_vp_file_path <- function(data_info, time_str){
+    time_format <- '%Y-%m-%d %H:%M:%S'
+    datetime <- as.POSIXct(time_str, format = time_format, tz = 'UTC')
+    d_time <- format(datetime, data_info$format_dir)
+    d_dir <- file.path(data_info$dir, d_time)
+    vp_f <- list.files(d_dir, data_info$pattern)
+    if(length(vp_f) == 0) return(NULL)
+    vp_times <- as.POSIXct(vp_f, format = data_info$format_file, tz = 'UTC')
+    diff_t <- abs(difftime(vp_times, datetime, units = 'secs'))
+    time <- vp_times[which.min(diff_t)]
+    vp_file <- format(time, data_info$format_file)
+    file.path(d_dir, vp_file)
+}
+
+get_vp_files_path <- function(data_info, start_time, end_time){
+    time_format <- '%Y-%m-%d %H:%M:%S'
+    start <- as.POSIXct(start_time, format = time_format, tz = 'UTC')
+    end <- as.POSIXct(end_time, format = time_format, tz = 'UTC')
+    dates_dir <- seq(as.Date(start), as.Date(end), 'day')
+    vp_files <- lapply(dates_dir, function(d){
+        d_time <- format(d, data_info$format_dir)
+        d_dir <- file.path(data_info$dir, d_time)
+        vp_f <- list.files(d_dir, data_info$pattern)
+        if(length(vp_f) == 0) return(NULL)
+        vp_times <- as.POSIXct(vp_f, format = data_info$format_file, tz = 'UTC')
+        it <- vp_times >= start & vp_times <= end
+        if(!any(it)) return(NULL)
+        paste0(d, '/', vp_f[it])
+    })
+    vp_files <- do.call(c, vp_files)
+    if(length(vp_files) == 0) return(NULL)
+    file.path(data_info$dir, vp_files)
 }

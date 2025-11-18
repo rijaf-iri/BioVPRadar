@@ -4,13 +4,12 @@
 \alias{get_vp}
 \title{Vertical profile.}
 \usage{
-get_vp(data_info, query)
+get_vp(config_dir, query)
 }
 \arguments{
-\item{data_info}{named list, list containing the vertical profiles dataset information.
-To be replaced by a connection to postgresql.}
+\item{config_dir}{character, full path to \code{BioConfigRadar}.}
 
-\item{query}{named list, user query \code{list(parameter, time)}.}
+\item{query}{named list, user query \code{list(parameter, time, species, radarID)}.}
 }
 \value{
 A named list, \code{list(status, data)}

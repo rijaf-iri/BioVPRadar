@@ -4,13 +4,12 @@
 \alias{get_vpts_image}
 \title{Image vertical profile time series.}
 \usage{
-get_vpts_image(data_info, query)
+get_vpts_image(config_dir, query)
 }
 \arguments{
-\item{data_info}{named list, list containing the vertical profiles dataset information.
-To be replaced by a connection to postgresql.}
+\item{config_dir}{character, full path to \code{BioConfigRadar}.}
 
-\item{query}{named list, user query \code{list(parameter, startTime, endTime)}.}
+\item{query}{named list, user query \code{list(parameter, startTime, endTime, species, radarID)}.}
 }
 \value{
 A named list, \code{list(status, data)}

@@ -14,7 +14,7 @@ create_bioDBConnection(
 )
 }
 \arguments{
-\item{config_dir}{character, full path to BioConfigRadar.}
+\item{config_dir}{character, full path to \code{BioConfigRadar}.}
 
 \item{db_name}{character, PostgreSQL database name.}
 

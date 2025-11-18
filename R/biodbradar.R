@@ -2,7 +2,7 @@
 #'
 #' Create the authentication to BioDBRadar.
 #' 
-#' @param config_dir character, full path to BioConfigRadar.
+#' @param config_dir character, full path to \code{BioConfigRadar}.
 #' @param db_name character, PostgreSQL database name.
 #' @param username character, PostgreSQL user name.
 #' @param password character, PostgreSQL user password.

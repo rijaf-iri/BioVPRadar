@@ -4,17 +4,20 @@
 \alias{compute_vp}
 \title{Compute vertical profile.}
 \usage{
-compute_vp(radar_file, config_dir, rwanda = TRUE, radar_id = 1)
+compute_vp(radar_file, config_dir, species, rwanda = TRUE)
 }
 \arguments{
 \item{radar_file}{character, full path to a single radar polar volume file.
 The file data format should be \code{ODIM HDF5} or \code{NEXRAD Level 2}.}
 
-\item{config_dir}{character, full path to BioConfigRadar.}
+\item{config_dir}{character, full path to \code{BioConfigRadar}.}
+
+\item{species}{character, \code{"bird"} or \code{"insect"}.}
 
 \item{rwanda}{logical, \code{TRUE} if the file is from MeteoRwanda new format \code{ODIM HDF5}.}
-
-\item{radar_id}{integer, the radar id.}
+}
+\value{
+A vertical profile object of class \code{vp}.
 }
 \description{
 Compute a vertical profile of bird and insect from a polar volume.

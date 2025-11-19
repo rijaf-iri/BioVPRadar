@@ -92,8 +92,12 @@ fetch_vp <- function(con, time, species, radar_id){
     vp_s <- vp_s[, -(1:2)]
     names(vp_s)[names(vp_s) == 'dbzh'] <- 'DBZH'
 
+    rm <- c('day', 'sunrise', 'sunset')
     vp <- cbind(vp_s, vp_p, radar)
+    vp_p <- vp[, rm]
+    vp <- vp[, !names(vp) %in% rm]
     vp <- bioRad::as.vp(vp)
+    vp$data <- cbind(vp$data, vp_p)
     return(list(status = 0, vp = vp))
 }
 
@@ -151,11 +155,16 @@ fetch_vpts <- function(
     vp_s <- vp_s[, -1]
     names(vp_s)[names(vp_s) == 'dbzh'] <- 'DBZH'
 
+    rm <- c('day', 'sunrise', 'sunset')
     vps <- lapply(vp_p$id, function(id){
         tmp_p <- vp_p[vp_p$id == id, -1]
         tmp_s <- vp_s[vp_s$polar_id == id, -1]
         tmp <- cbind(tmp_s, tmp_p, radar)
-        bioRad::as.vp(tmp)
+        tmp_p <- tmp[, rm]
+        tmp <- tmp[, !names(tmp) %in% rm]
+        tmp <- bioRad::as.vp(tmp)
+        tmp$data <- cbind(tmp$data, tmp_p)
+        tmp
     })
 
     return(list(status = 0, vp = vps))

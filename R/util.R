@@ -1,3 +1,4 @@
+# parallel loop variable
 utils::globalVariables(c('jlp'))
 
 get_log_file <- function(bioradar_dir, log_dir, prefix){

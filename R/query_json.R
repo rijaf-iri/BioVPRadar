@@ -1,13 +1,14 @@
 get_vp_json <- function(vp, query){
     info <- get_vp_params(query$parameter)
     df_vp <- as.data.frame(vp)
+    frmt <- '%Y-%m-%d %H:%M:%S'
     out <- list(
-        time = df_vp$datetime[1],
+        time = format(df_vp$datetime[1], frmt),
         name = info$name,
         units = info$units,
         day = df_vp$day[1],
-        sunrise = df_vp$sunrise[1],
-        sunset = df_vp$sunset[1],
+        sunrise = format(df_vp$sunrise[1], frmt),
+        sunset = format(df_vp$sunset[1], frmt),
         height = df_vp$height,
         parameter = df_vp[, query$parameter],
         ff = df_vp$ff,
@@ -50,16 +51,17 @@ get_vpts_json <- function(vpts, query){
     sunrise <- df_vpts$sunrise[it]
     sunset <- df_vpts$sunset[it]
 
+    frmt <- '%Y-%m-%d %H:%M:%S'
     out <- list(
         name = info$name,
         units = info$units,
-        times = times,
+        times = format(times, frmt),
         height = height, 
         parameter = param,
         ff = ff,
         dd = dd,
-        sunrise = sunrise,
-        sunset = sunset,
+        sunrise = format(sunrise, frmt),
+        sunset = format(sunset, frmt),
         query_par = query$parameter,
         query_spec = query$species
     )
@@ -77,17 +79,18 @@ get_vtip_json <- function(vpts, query){
     sunrise <- df_vpts$sunrise[it]
     sunset <- df_vpts$sunset[it]
 
+    frmt <- '%Y-%m-%d %H:%M:%S'
     out <- list(
         name = info$name,
         units = info$units,
         height = vpi$height,
-        times = vpi$datetime,
+        times = format(vpi$datetime, frmt),
         parameter = vpi[, query$parameter],
         ff = vpi$ff,
         dd = vpi$dd,
         day = day,
-        sunrise = sunrise,
-        sunset = sunset,
+        sunrise = format(sunrise, frmt),
+        sunset = format(sunset, frmt),
         query_par = query$parameter,
         query_spec = query$species
     )

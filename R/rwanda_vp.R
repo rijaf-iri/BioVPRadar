@@ -68,6 +68,10 @@ wrapper_rwanda_vp <- function(
         return(-1)
     }
 
+    print(
+        paste('Start process pvol | system time:', Sys.time())
+    )
+
     rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
     args <- c(pvol_file = radar_file, rwd_wrong_swp)
     pvol <- do.call(rwanda_read_pvol, args)
@@ -75,6 +79,11 @@ wrapper_rwanda_vp <- function(
     bioRad::write_pvolfile(
         pvol, file = tmp_pvol_file, overwrite = TRUE
     )
+
+    print(
+        paste('End process pvol | system time:', Sys.time())
+    )
+
     config_rcs <- jsonlite::fromJSON(rcs_file)
     config_user <- jsonlite::fromJSON(vp_conf_file)
     config <- vol2birdR::vol2bird_config()
@@ -95,6 +104,11 @@ wrapper_rwanda_vp <- function(
         vp <- bioRad::read_vpts(tmp_vp_file)
         vp <- as.data.frame(vp)
 
+        print(
+            paste('vp', species, 'computed | vp_time:', vp$datetime[1],
+                  '| system time:', Sys.time())
+        )
+
         if(is.null(polar_id)){
             vp_polar <- list(
                 radar_id = radar_id,
@@ -112,6 +126,11 @@ wrapper_rwanda_vp <- function(
                 return(-1)
             }
             polar_id <- ret_vp_polar$id
+
+            print(
+                paste('vp_polar update', vp$datetime[1],
+                      '| system time:', Sys.time())
+            )
         }
 
         vp_species <- cbind(polar_id = polar_id, vp[, 3:18])
@@ -123,9 +142,19 @@ wrapper_rwanda_vp <- function(
             format_out_msg(ret_vp_species$msg, log_file)
             return(-1)
         }
+
+        print(
+            paste('vp', species, 'update', vp$datetime[1],
+                  '| system time:', Sys.time())
+        )
     }
 
     update_vp_timerange(con, radar_id, vp$datetime[1])
+
+    print(
+        paste('vp_timerange update', vp$datetime[1],
+              '| system time:', Sys.time())
+    )
 }
 
 populate_vp_polar <- function(con, data){

@@ -170,31 +170,39 @@ process_rwanda_vps <- function(bioradar_dir, start_time, end_time, radar_id = 1)
         return(-1)
     }
 
-    for(i in seq_along(radar_files)){
-        for(j in seq_along(radar_files[[i]]$files)){
-            radar_file <- file.path(
-                radar_info$radar$polar$dir,
-                radar_files[[i]]$dir,
-                radar_files[[i]]$files[j]
-            )
-            ret <- try(
-                wrapper_rwanda_vp(
-                    radar_file, bioradar_dir, radar_id
-                ),
-                silent = TRUE
-            )
-            if(inherits(ret, 'try-error')){
-                msg1 <- paste( 
-                    'File', radar_files[[i]]$dir,
-                    '/', radar_files[[i]]$files[j],
-                    '\n'
-                )
-                msg2 <- gsub('[\r\n]', '', ret[1])
-                format_out_msg(paste0(msg1, msg2), log_file)
-                next
-            }
+    radar_files <- lapply(radar_files, function(f){
+        file.path(f$dir, f$files)
+    })
+    radar_files <- do.call(c, radar_files)
+    radar_files <- file.path(
+        radar_info$radar$polar$dir, radar_files
+    )
+
+    klust <- parallel::makeCluster(5)
+    doSNOW::registerDoSNOW(klust)
+    `%dopar%` <- foreach::`%dopar%`
+
+    ret <- foreach::foreach(
+            jlp = seq_along(radar_files),
+            .export = c('wrapper_rwanda_vp', 'format_out_msg'),
+            .combine = 'c'
+        ) %dopar% {
+        ret <- try(
+            wrapper_rwanda_vp(
+                radar_files[jlp], bioradar_dir, radar_id
+            ),
+            silent = TRUE
+        )
+        if(inherits(ret, 'try-error')){
+            msg1 <- paste('File:', radar_files[jlp], '\n')
+            msg2 <- gsub('[\r\n]', '', ret[1])
+            format_out_msg(paste0(msg1, msg2), log_file)
+            return(-1)
         }
+        return(0)
     }
+
+    parallel::stopCluster(klust)
 
     return(0)
 }

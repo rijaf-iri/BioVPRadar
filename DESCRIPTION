@@ -22,4 +22,6 @@ Imports:
     methods,
     DBI,
     RPostgres,
+    doSNOW,
+    foreach,
 RoxygenNote: 7.3.2

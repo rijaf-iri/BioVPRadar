@@ -1,8 +1,14 @@
 
-remove_invalid_scans <- function(pvol, nbins = NULL, elangle = NULL){
+remove_invalid_scans <- function(
+    pvol, nbins = NULL, elangle = NULL
+){
     if(is.null(nbins) | is.null(elangle)) return(pvol)
-    scans_nbins <- sapply(pvol$scans, function(x) x$attributes$where$nbins)
-    scans_elangle <- sapply(pvol$scans, function(x) x$attributes$where$elangle)
+    scans_nbins <- sapply(
+        pvol$scans, function(x) x$attributes$where$nbins
+    )
+    scans_elangle <- sapply(
+        pvol$scans, function(x) x$attributes$where$elangle
+    )
     rm <- scans_nbins %in% nbins & scans_elangle %in% elangle
     pvol$scans <- pvol$scans[!rm]
     return(pvol)
@@ -33,21 +39,18 @@ correct_attrs_scans <- function(pvol){
     return(pvol)
 }
 
-rwanda_read_pvol <- function(pvol_file, nbins, elangle, bio_filter = TRUE){
+rwanda_read_pvol <- function(
+    pvol_file, nbins, elangle, bio_filter = TRUE
+){
     pvol <- bioRad::read_pvolfile(pvol_file)
     pvol <- remove_invalid_scans(pvol, nbins, elangle)
     pvol <- correct_attrs_scans(pvol)
     if(bio_filter){
-        pvol <- filter_non_biological(pvol)
+        pvol <- suppressWarnings(
+            filter_non_biological(pvol)
+        )
     }
     return(pvol)
-}
-
-compute_dr <- function(ZDR, RHOHV){
-    num <- 1 + ZDR - 2 * (ZDR^0.5) * RHOHV
-    den <- 1 + ZDR + 2 * (ZDR^0.5) * RHOHV
-    dr <- suppressWarnings(10 * log10(num / den))
-    return(dr)
 }
 
 filter_non_biological <- function(pvol){
@@ -56,7 +59,7 @@ filter_non_biological <- function(pvol){
     pvol <- bioRad::calculate_param(
         pvol, 
         DBZH = dplyr::if_else(
-            c(DBZH) > 15, NA, c(DBZH)
+            c(DBZH) > 35, NA, c(DBZH)
         )
     )
     pvol <- bioRad::calculate_param(
@@ -67,7 +70,10 @@ filter_non_biological <- function(pvol){
     )
     pvol <- bioRad::calculate_param(
         pvol, 
-        DR = compute_dr(ZDR, RHOHV)
+        DR = suppressWarnings(
+                (1 + ZDR - 2 * (ZDR^0.5) * RHOHV) /
+                (1 + ZDR + 2 * (ZDR^0.5) * RHOHV)
+            )
     )
     pvol <- bioRad::calculate_param(
         pvol, 

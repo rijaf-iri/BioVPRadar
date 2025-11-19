@@ -33,10 +33,84 @@ correct_attrs_scans <- function(pvol){
     return(pvol)
 }
 
-rwanda_read_pvol <- function(pvol_file, nbins, elangle){
+rwanda_read_pvol <- function(pvol_file, nbins, elangle, bio_filter = TRUE){
     pvol <- bioRad::read_pvolfile(pvol_file)
     pvol <- remove_invalid_scans(pvol, nbins, elangle)
     pvol <- correct_attrs_scans(pvol)
+    if(bio_filter){
+        pvol <- filter_non_biological(pvol)
+    }
+    return(pvol)
+}
 
+compute_dr <- function(ZDR, RHOHV){
+    num <- 1 + ZDR - 2 * (ZDR^0.5) * RHOHV
+    den <- 1 + ZDR + 2 * (ZDR^0.5) * RHOHV
+    dr <- suppressWarnings(10 * log10(num / den))
+    return(dr)
+}
+
+filter_non_biological <- function(pvol){
+    DBZH <- DR <- ZDR <- RHOHV <- NA
+    WRADH <- VRADH <- PHIDP <- NA
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        DBZH = dplyr::if_else(
+            c(DBZH) > 15, NA, c(DBZH)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        DBZH = dplyr::if_else(
+            c(RHOHV) > 0.90, NA, c(DBZH)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        DR = compute_dr(ZDR, RHOHV)
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        DBZH = dplyr::if_else(
+            c(DR) < -12, NA, c(DBZH)
+        )
+    )
+    # filter other fields
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        RHOHV = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(RHOHV)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        DR = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(DR)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        WRADH = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(WRADH)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        PHIDP = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(PHIDP)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        ZDR = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(ZDR)
+        )
+    )
+    pvol <- bioRad::calculate_param(
+        pvol, 
+        VRADH = dplyr::if_else(
+            c(is.na(DBZH)), NA, c(VRADH)
+        )
+    )
     return(pvol)
 }

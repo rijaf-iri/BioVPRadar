@@ -14,6 +14,7 @@ Imports:
     vol2birdR,
     reshape2,
     ncdf4,
+    dplyr,
     sf,
     sp,
     raster,

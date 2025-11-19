@@ -41,35 +41,42 @@ wrapper_rwanda_vp <- function(
         dir_config, 'config_rwanda_new_odim.json'
     )
     if(!file.exists(sweep_file)){
-        msg <- paste('File does not exist:', sweep_file)
+        msg <- paste(
+            'File does not exist:', sweep_file
+        )
         format_out_msg(msg, log_file)
         return(-1)
     }
-    rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
+    rcs_file <- file.path(
+        dir_config, 'config_rcs.json'
+    )
+    if(!file.exists(rcs_file)){
+        msg <- paste(
+            'File does not exist:', rcs_file
+        )
+        format_out_msg(msg, log_file)
+        return(-1)
+    }
+    vp_conf_file <- file.path(
+        dir_config, 'config_vlo2bird.json'
+    )
+    if(!file.exists(vp_conf_file)){
+        msg <- paste(
+            'File does not exist:', vp_conf_file
+        )
+        format_out_msg(msg, log_file)
+        return(-1)
+    }
 
+    rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
     args <- c(pvol_file = radar_file, rwd_wrong_swp)
     pvol <- do.call(rwanda_read_pvol, args)
     tmp_pvol_file <- tempfile(fileext = '.h5')
     bioRad::write_pvolfile(
         pvol, file = tmp_pvol_file, overwrite = TRUE
     )
-
-    rcs_file <- file.path(dir_config, 'config_rcs.json')
-    if(!file.exists(rcs_file)){
-        msg <- paste('File does not exist:', rcs_file)
-        format_out_msg(msg, log_file)
-        return(-1)
-    }
     config_rcs <- jsonlite::fromJSON(rcs_file)
-
-    vp_conf_file <- file.path(dir_config, 'config_vlo2bird.json')
-    if(!file.exists(vp_conf_file)){
-        msg <- paste('File does not exist:', vp_conf_file)
-        format_out_msg(msg, log_file)
-        return(-1)
-    }
     config_user <- jsonlite::fromJSON(vp_conf_file)
-
     config <- vol2birdR::vol2bird_config()
 
     polar_id <- NULL

@@ -13,3 +13,6 @@ export(get_vpts)
 export(get_vtip)
 export(get_vpts_image)
 export(get_vtip_image)
+
+importFrom(dplyr, '%>%')
+importFrom(dplyr, .data)

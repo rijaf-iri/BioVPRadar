@@ -66,6 +66,7 @@ get_vpts_image <- function(config_dir, query){
     )
 
     pngfile <- tempfile()
+    on.exit(unlink(pngfile))
     grDevices::png(pngfile, width = 900, height = 450)
     plot(
         vpts, quantity = query$parameter,
@@ -79,7 +80,6 @@ get_vpts_image <- function(config_dir, query){
     bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])
     bin_data <- RCurl::base64Encode(bin_data, 'txt')
     png_base64 <- paste0('data:image/png;base64,', bin_data)
-    unlink(pngfile)
 
     list(status = 0, data = png_base64)
 }
@@ -127,6 +127,7 @@ get_vtip_image <- function(config_dir, query){
     vpi <- bioRad::integrate_profile(vpts)
 
     pngfile <- tempfile()
+    on.exit(unlink(pngfile))
     grDevices::png(pngfile, width = 900, height = 450)
     plot(
         vpi, quantity = query$parameter,
@@ -140,7 +141,6 @@ get_vtip_image <- function(config_dir, query){
     bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])
     bin_data <- RCurl::base64Encode(bin_data, 'txt')
     png_base64 <- paste0('data:image/png;base64,', bin_data)
-    unlink(pngfile)
 
     list(status = 0, data = png_base64)
 }

@@ -47,12 +47,13 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     )
 
     if(is.null(radar_files)){
-        msg <- paste(
-            'No data found for time from',
-            start_time, 'to', end_time
-        )
-        format_out_msg(msg, log_file)
-        return(-1)
+        # msg <- paste(
+        #     'No data found for time from',
+        #     start_time, 'to', end_time
+        # )
+        # format_out_msg(msg, log_file)
+        # return(-1)
+        return(0)
     }
 
     radar_files <- lapply(radar_files, function(f){

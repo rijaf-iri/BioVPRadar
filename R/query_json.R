@@ -1,6 +1,6 @@
 get_vp_json <- function(vp, query){
     info <- get_vp_params(query$parameter)
-    df_vp <- as.data.frame(vp)
+    df_vp <- as.data.frame(vp, suntime = FALSE)
     frmt <- '%Y-%m-%d %H:%M:%S'
     out <- list(
         time = format(df_vp$datetime[1], frmt),
@@ -23,7 +23,10 @@ get_vp_json <- function(vp, query){
 
 get_vpts_json <- function(vpts, query){
     info <- get_vp_params(query$parameter)
-    df_vpts <- as.data.frame(vpts)
+    df_vpts <- as.data.frame(vpts, suntime = FALSE)
+
+    frmt <- '%Y-%m-%d %H:%M:%S'
+    df_vpts$datetime <- format(df_vpts$datetime, frmt)
 
     ff <- reshape2::acast(
         df_vpts, height ~ datetime, value.var = 'ff'
@@ -51,17 +54,16 @@ get_vpts_json <- function(vpts, query){
     sunrise <- df_vpts$sunrise[it]
     sunset <- df_vpts$sunset[it]
 
-    frmt <- '%Y-%m-%d %H:%M:%S'
     out <- list(
         name = info$name,
         units = info$units,
-        times = format(times, frmt),
+        times = times,
         height = height, 
         parameter = param,
         ff = ff,
         dd = dd,
-        sunrise = format(sunrise, frmt),
-        sunset = format(sunset, frmt),
+        sunrise = sunrise,
+        sunset = sunset,
         query_par = query$parameter,
         query_spec = query$species
     )
@@ -73,7 +75,7 @@ get_vpts_json <- function(vpts, query){
 get_vtip_json <- function(vpts, query){
     info <- get_vpi_params(query$parameter)
     vpi <- bioRad::integrate_profile(vpts)
-    df_vpts <- as.data.frame(vpts)
+    df_vpts <- as.data.frame(vpts, suntime = FALSE)
     it <- which(df_vpts$height == df_vpts$height[1])
     day <- df_vpts$day[it]
     sunrise <- df_vpts$sunrise[it]
@@ -89,8 +91,8 @@ get_vtip_json <- function(vpts, query){
         ff = vpi$ff,
         dd = vpi$dd,
         day = day,
-        sunrise = format(sunrise, frmt),
-        sunset = format(sunset, frmt),
+        sunrise = sunrise,
+        sunset = sunset,
         query_par = query$parameter,
         query_spec = query$species
     )

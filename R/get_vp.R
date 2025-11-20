@@ -36,7 +36,6 @@ get_vpts <- function(config_dir, query){
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
     vpts <- bioRad::regularize_vpts(vpts)
-
     json <- get_vpts_json(vpts, query)
     list(status = 0, data = json)
 }
@@ -97,7 +96,6 @@ get_vtip <- function(config_dir, query){
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
     vpts <- bioRad::regularize_vpts(vpts)
-
     json <- get_vtip_json(vpts, query)
     list(status = 0, data = json)
 }

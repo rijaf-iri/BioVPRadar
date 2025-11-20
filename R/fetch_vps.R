@@ -42,6 +42,13 @@ get_vpts_db <- function(config_dir, query){
         return(list(status = -1, message = msg))
     }
 
+    frmt <- '%Y-%m-%d %H:%M:%S'
+    ret$vp <- lapply(ret$vp, function(vp){
+        vp$data$sunrise <- format(vp$data$sunrise, frmt)
+        vp$data$sunset <- format(vp$data$sunset, frmt)
+        vp
+    })
+
     return(ret)
 }
 

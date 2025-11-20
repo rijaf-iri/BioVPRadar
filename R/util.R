@@ -39,6 +39,30 @@ assign_lists <- function(inupt_args, init_pars){
     return(init_pars)
 }
 
+fill_na_nearest <- function(x) {
+    idx <- which(!is.na(x))
+    if (length(idx) == 0) return(x)
+    nearest_left <- stats::approx(
+        idx, idx, xout = seq_along(x),
+        method = 'constant', f = 1, rule = 2
+    )
+    nearest_right <- stats::approx(
+        idx, idx, xout = seq_along(x),
+        method = 'constant', f = 0, rule = 2
+    )
+    nearest_left <- nearest_left$y
+    nearest_right <- nearest_right$y
+
+    dist_left <- abs(seq_along(x) - nearest_left)
+    dist_right <- abs(seq_along(x) - nearest_right)
+  
+    chosen_idx <- ifelse(
+        dist_left <= dist_right, nearest_left, nearest_right
+    )
+
+    return(x[chosen_idx])
+}
+
 extract_filename_dates <- function(filenames, fileformat){
     expr <- gregexpr('%', fileformat)[[1]]
     len <- rep(2, length(expr))

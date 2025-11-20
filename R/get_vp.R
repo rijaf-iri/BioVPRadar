@@ -35,7 +35,7 @@ get_vpts <- function(config_dir, query){
     if(ret$status == -1) return(ret)
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
-    vpts <- bioRad::regularize_vpts(vpts)
+    vpts <- regularize_vpts(vpts)
     json <- get_vpts_json(vpts, query)
     list(status = 0, data = json)
 }
@@ -57,7 +57,7 @@ get_vpts_image <- function(config_dir, query){
     if(ret$status == -1) return(ret)
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
-    vpts <- bioRad::regularize_vpts(vpts)
+    vpts <- regularize_vpts(vpts)
 
     pngfile <- tempfile()
     grDevices::png(pngfile, width = 900, height = 450)
@@ -95,7 +95,7 @@ get_vtip <- function(config_dir, query){
     if(ret$status == -1) return(ret)
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
-    vpts <- bioRad::regularize_vpts(vpts)
+    vpts <- regularize_vpts(vpts)
     json <- get_vtip_json(vpts, query)
     list(status = 0, data = json)
 }
@@ -117,7 +117,7 @@ get_vtip_image <- function(config_dir, query){
     if(ret$status == -1) return(ret)
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
-    vpts <- bioRad::regularize_vpts(vpts)
+    vpts <- regularize_vpts(vpts)
     vpi <- bioRad::integrate_profile(vpts)
 
     pngfile <- tempfile()
@@ -137,4 +137,25 @@ get_vtip_image <- function(config_dir, query){
     unlink(pngfile)
 
     list(status = 0, data = png_base64)
+}
+
+regularize_vpts <- function(vpts){
+    vpts <- bioRad::regularize_vpts(vpts)
+
+    ix <- seq_along(vpts$height)
+
+    sunrise <- lapply(ix, function(i){
+        fill_na_nearest(vpts$data$sunrise[i, ])
+    })
+    vpts$data$sunrise <- do.call(rbind, sunrise)
+    sunset <- lapply(ix, function(i){
+        fill_na_nearest(vpts$data$sunset[i, ])
+    })
+    vpts$data$sunset <- do.call(rbind, sunset)
+    day <- lapply(ix, function(i){
+        fill_na_nearest(vpts$data$day[i, ])
+    })
+    vpts$data$day <- do.call(rbind, day)
+
+    return(vpts)
 }

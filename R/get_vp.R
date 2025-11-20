@@ -58,6 +58,12 @@ get_vpts_image <- function(config_dir, query){
 
     vpts <- bioRad::bind_into_vpts(ret$vp)
     vpts <- regularize_vpts(vpts)
+    vpts$datetime <- time_utc2time_local(
+        vpts$datetime, 'Africa/Kigali'
+    )
+    vpts$daterange <- time_utc2time_local(
+        vpts$daterange, 'Africa/Kigali'
+    )
 
     pngfile <- tempfile()
     grDevices::png(pngfile, width = 900, height = 450)
@@ -119,6 +125,10 @@ get_vtip_image <- function(config_dir, query){
     vpts <- bioRad::bind_into_vpts(ret$vp)
     vpts <- regularize_vpts(vpts)
     vpi <- bioRad::integrate_profile(vpts)
+
+    vpi$datetime <- time_utc2time_local(
+        vpi$datetime, 'Africa/Kigali'
+    )
 
     pngfile <- tempfile()
     grDevices::png(pngfile, width = 900, height = 450)

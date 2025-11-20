@@ -126,15 +126,11 @@ get_vtip_image <- function(config_dir, query){
     vpts <- regularize_vpts(vpts)
     vpi <- bioRad::integrate_profile(vpts)
 
-    # vpi$datetime <- time_utc2time_local(
-    #     vpi$datetime, 'Africa/Kigali'
-    # )
-
     pngfile <- tempfile()
     grDevices::png(pngfile, width = 900, height = 450)
     plot(
         vpi, quantity = query$parameter,
-        night_shade = TRUE, xlab = 'Time (UTC)',
+        night_shade = TRUE, xlab = '',
         cex.lab = 1.5, cex.axis = 1.2,
         cex.main = 1.5, font.main = 2
     )

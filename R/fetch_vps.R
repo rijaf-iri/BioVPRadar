@@ -63,13 +63,20 @@ fetch_vp <- function(con, time, species, radar_id){
         'radar_height', 'radar_wavelength'
     )
 
-    params <- list(radar_id, time)
-
-    vp_p <- DBI::dbGetQuery(con, 
+    t_frmt <- '%Y-%m-%d %H:%M:%S'
+    t_time <- as.POSIXct(time, tz = 'UTC')
+    time1 <- format(t_time - 3600, t_frmt)
+    time2 <- format(t_time + 3600, t_frmt)
+    params <- list(radar_id, time1, time2, time)
+    vp_p <- DBI::dbGetQuery(con,
         "SELECT * FROM vp_polar
-         WHERE radar_id=$1 AND date_time=$2;",
+         WHERE radar_id=$1 AND 
+         date_time BETWEEN $2 AND $3
+         ORDER BY ABS(EXTRACT(EPOCH FROM (date_time - $4)))
+         LIMIT 1;",
         params = params
     )
+
     if(nrow(vp_p) == 0){
         msg <- 'No data found'
         return(list(status = -1, message = msg))
@@ -86,6 +93,8 @@ fetch_vp <- function(con, time, species, radar_id){
         'day', 'sunrise', 'sunset'
     )
 
+    time_req <- format(vp_p$datetim, t_frmt)
+    params <- list(radar_id, time_req)
     sqlCmd <- sprintf(
         "SELECT s.*
          FROM %s s
@@ -93,6 +102,7 @@ fetch_vp <- function(con, time, species, radar_id){
          WHERE p.radar_id=$1 AND p.date_time=$2;",
         paste0('vp_', species)
     )
+
     vp_s <- DBI::dbGetQuery(
         con, sqlCmd, params = params
     )

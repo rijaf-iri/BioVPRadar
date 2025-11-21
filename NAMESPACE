@@ -2,15 +2,22 @@ export(create_bioDBConnection)
 export(create_bioDBRadar)
 export(verify_bioDBRadar)
 export(add_new_radar)
+
 export(compute_vp)
 export(wrapper_rwanda_vp)
 export(process_rwanda_vp)
 export(process_rwanda_vps)
 export(production_rwanda_vp)
 
+export(wrapper_rwanda_vid)
+export(process_rwanda_vid)
+export(process_rwanda_vids)
+export(production_rwanda_vid)
+
 export(get_vp)
 export(get_vpts)
 export(get_vtip)
+export(get_vp_image)
 export(get_vpts_image)
 export(get_vtip_image)
 

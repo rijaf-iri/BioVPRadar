@@ -18,6 +18,45 @@ get_vp <- function(config_dir, query){
     list(status = 0, data = json)
 }
 
+#' Image vertical profile.
+#'
+#' Plot vertical profile.
+#' 
+#' @param config_dir character, full path to \code{BioConfigRadar}.
+#' @param query named list, user query \code{list(parameter, startTime, endTime, species, radarID)}.
+#'
+#' @return A named list, \code{list(status, data)}
+#' 
+#' @export
+
+get_vp_image <- function(config_dir, query){
+    ret <- get_vp_db(config_dir, query)
+
+    if(ret$status == -1) return(ret)
+
+    pngfile <- tempfile()
+    on.exit(unlink(pngfile))
+    grDevices::png(pngfile, width = 450, height = 900)
+    op <- graphics::par(mar = c(5.1, 5.1, 2.1, 2.1))
+    plot(
+        ret$vp, quantity = query$parameter,
+        ylab = 'Altitude [km]',
+        ylim = c(1.6, 6.5), 
+        line_col = 'blue', line_lwd = 1.5,
+        cex.lab = 1.5, cex.axis = 1.2,
+        cex.main = 1.5, font.main = 2
+    )
+    graphics::grid()
+    graphics::par(op)
+    grDevices::dev.off()
+
+    bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])
+    bin_data <- RCurl::base64Encode(bin_data, 'txt')
+    png_base64 <- paste0('data:image/png;base64,', bin_data)
+
+    list(status = 0, data = png_base64)
+}
+
 #' Vertical profile time series.
 #'
 #' Get a vertical profile time series.

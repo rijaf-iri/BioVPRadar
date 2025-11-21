@@ -69,11 +69,7 @@ wrapper_rwanda_vp <- function(
     }
 
     # -----------------------------------
-    cat(
-        paste('Start | process pvol |', basename(radar_file),
-            '|', Sys.time(), '\n'),
-         file = paste0(log_file, '.test'), append = TRUE
-    )
+    cat(paste('Start | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
     # -----------------------------------
 
     rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
@@ -85,11 +81,7 @@ wrapper_rwanda_vp <- function(
     )
 
     # -----------------------------------
-    cat(
-        paste('Finish | process pvol |', basename(radar_file),
-              '|', Sys.time(), '\n'),
-        file = paste0(log_file, '.test'), append = TRUE
-    )
+    cat(paste('Finish | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
     # -----------------------------------
 
     config_rcs <- jsonlite::fromJSON(rcs_file)
@@ -102,11 +94,7 @@ wrapper_rwanda_vp <- function(
         config_species <- assign_lists(config_user, config)
 
         # -----------------------------------
-        cat(
-            paste('Start | compute vp_', species, '|', basename(radar_file), 
-                  '|', Sys.time(), '\n'),
-            file = paste0(log_file, '.test'), append = TRUE
-        )
+        cat(paste('Start | compute vp_', species, '|', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
 
         tmp_vp_file <- tempfile(fileext = '.h5')
@@ -121,20 +109,12 @@ wrapper_rwanda_vp <- function(
         vp <- as.data.frame(vp)
 
         # -----------------------------------
-        cat(
-            paste('Finish | compute vp_', species, '|', basename(radar_file), 
-                  '|', Sys.time(), '\n'),
-            file = paste0(log_file, '.test'), append = TRUE
-        )
+        cat(paste('Finish | compute vp_', species, '|', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
 
         if(is.null(polar_id)){
             # -----------------------------------
-            cat(
-                paste('Start | populate vp_polar |', vp$datetime[1], 
-                      '|', Sys.time(), '\n'),
-                file = paste0(log_file, '.test'), append = TRUE
-            )
+            cat(paste('Start | populate vp_polar |', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
             # -----------------------------------
 
             vp_polar <- list(
@@ -155,20 +135,12 @@ wrapper_rwanda_vp <- function(
             polar_id <- ret_vp_polar$id
 
             # -----------------------------------
-            cat(
-                paste('Finish | populate vp_polar |', vp$datetime[1], 
-                      '|', Sys.time(), '\n'),
-                file = paste0(log_file, '.test'), append = TRUE
-            )
+            cat(paste('Finish | populate vp_polar |', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
             # -----------------------------------
         }
 
         # -----------------------------------
-        cat(
-            paste('Start | populate vp_', species, '|', vp$datetime[1], 
-                  '|', Sys.time(), '\n'),
-            file = paste0(log_file, '.test'), append = TRUE
-        )
+        cat(paste('Start | populate vp_', species, '|', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
 
         vp_species <- cbind(polar_id = polar_id, vp[, 3:18])
@@ -182,11 +154,7 @@ wrapper_rwanda_vp <- function(
         }
 
         # -----------------------------------
-        cat(
-            paste('Finish | populate vp_', species, '|', vp$datetime[1], 
-                  '|', Sys.time(), '\n'),
-            file = paste0(log_file, '.test'), append = TRUE
-        )
+        cat(paste('Finish | populate vp_', species, '|', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
     }
 

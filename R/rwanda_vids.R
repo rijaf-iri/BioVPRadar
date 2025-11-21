@@ -1,19 +1,20 @@
-#' Vertical profile for MeteoRwanda radar data, production mode.
+#' Spatial estimates of VID for MeteoRwanda radar data, production mode.
 #'
-#' Compute a vertical profile of bird and insect
+#' Compute the spatial estimates of 
+#' vertically integrated density of bird and insect
 #' from MeteoRwanda new format \code{ODIM HDF5}
-#' and store the outputs into \code{BioDBRadar}.
+#' and write the outputs to a netCDF file.
 #' 
 #' @param bioradar_dir character, full path to the parent folder containing \code{BioConfigRadar}.
 #' @param radar_id integer, the radar id.
 #'  
 #' @export
 
-production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
+production_rwanda_vid <- function(bioradar_dir, radar_id = 1){
     Sys.setenv(TZ = 'UTC')
     config_dir <- file.path(bioradar_dir, 'BioConfigRadar')
     dir_config <- file.path(config_dir, 'config')
-    log_file <- get_log_file(bioradar_dir, 'logs_vp', 'vp')
+    log_file <- get_log_file(bioradar_dir, 'logs_vid', 'vid')
 
     yaml_file <- file.path(dir_config, 'config_datasets.yaml')
     if(!file.exists(yaml_file)){
@@ -23,18 +24,21 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     }
     radar_info <- yaml::read_yaml(yaml_file)
 
-    con <- bioDBRadar(config_dir)
-    if(is.null(con)){
-        msg <- 'Unable to connect to BioDBRadar.'
-        format_out_msg(msg, log_file)
-        return(-1)
-    }
-    sqlCmd <- sprintf(
-        "SELECT end_time FROM vp_timerange WHERE radar_id=%s",
-        radar_id
-    )
-    last <- DBI::dbGetQuery(con, sqlCmd)
-    closeDB(con)
+    # con <- bioDBRadar(config_dir)
+    # if(is.null(con)){
+    #     msg <- 'Unable to connect to BioDBRadar.'
+    #     format_out_msg(msg, log_file)
+    #     return(-1)
+    # }
+    # sqlCmd <- sprintf(
+    #     "SELECT end_time FROM vp_timerange WHERE radar_id=%s",
+    #     radar_id
+    # )
+    # last <- DBI::dbGetQuery(con, sqlCmd)
+    # closeDB(con)
+
+    # get last from zarr
+    last <- list(end_time = as.POSIXct('2025-10-28 10:00:00', tz = 'UTC'))
 
     start_time <- format(
         last$end_time + 1, '%Y-%m-%d %H:%M:%S'
@@ -68,11 +72,11 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
 
     ret <- foreach::foreach(
             jlp = seq_along(radar_files),
-            .export = c('wrapper_rwanda_vp', 'format_out_msg'),
+            .export = c('wrapper_rwanda_vid', 'format_out_msg'),
             .combine = 'c'
         ) %dopar% {
         ret <- try(
-            wrapper_rwanda_vp(
+            wrapper_rwanda_vid(
                 radar_files[jlp], bioradar_dir, radar_id
             ),
             silent = TRUE
@@ -91,11 +95,12 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     return(0)
 }
 
-#' Vertical profile for MeteoRwanda radar data, one file.
+#' Spatial estimates of VID for MeteoRwanda radar data, one file.
 #'
-#' Compute a vertical profile of bird and insect
+#' Compute the spatial estimates of 
+#' vertically integrated density of bird and insect
 #' from MeteoRwanda new format \code{ODIM HDF5}
-#' and store the outputs into \code{BioDBRadar}.
+#' and write the outputs to a netCDF file.
 #' 
 #' @param bioradar_dir character, full path to the parent folder containing \code{BioConfigRadar}.
 #' @param time character, the time to process, format 'yyyy-mm-dd hh:mm:ss'.
@@ -103,10 +108,10 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
 #'  
 #' @export
 
-process_rwanda_vp <- function(bioradar_dir, time, radar_id = 1){
+process_rwanda_vid <- function(bioradar_dir, time, radar_id = 1){
     config_dir <- file.path(bioradar_dir, 'BioConfigRadar')
     dir_config <- file.path(config_dir, 'config')
-    log_file <- get_log_file(bioradar_dir, 'logs_vp', 'vp')
+    log_file <- get_log_file(bioradar_dir, 'logs_vid', 'vid')
 
     yaml_file <- file.path(dir_config, 'config_datasets.yaml')
     if(!file.exists(yaml_file)){
@@ -125,7 +130,7 @@ process_rwanda_vp <- function(bioradar_dir, time, radar_id = 1){
     }
 
     ret <- try(
-        wrapper_rwanda_vp(
+        wrapper_rwanda_vid(
             radar_file, bioradar_dir, radar_id
         ),
         silent = TRUE
@@ -140,11 +145,12 @@ process_rwanda_vp <- function(bioradar_dir, time, radar_id = 1){
     return(0)
 }
 
-#' Vertical profile for MeteoRwanda radar data, multiple files.
+#' Spatial estimates of VID for MeteoRwanda radar data, multiple files.
 #'
-#' Compute a vertical profile of bird and insect
+#' Compute the spatial estimates of 
+#' vertically integrated density of bird and insect
 #' from MeteoRwanda new format \code{ODIM HDF5}
-#' and store the outputs into \code{BioDBRadar}.
+#' and write the outputs to a netCDF file.
 #' 
 #' @param bioradar_dir character, full path to the parent folder containing \code{BioConfigRadar}.
 #' @param start_time character, start time to process, format 'yyyy-mm-dd hh:mm:ss'.
@@ -154,13 +160,13 @@ process_rwanda_vp <- function(bioradar_dir, time, radar_id = 1){
 #' 
 #' @export
 
-process_rwanda_vps <- function(
+process_rwanda_vids <- function(
     bioradar_dir, start_time, end_time,
     radar_id = 1, reverse = FALSE
 ){
     config_dir <- file.path(bioradar_dir, 'BioConfigRadar')
     dir_config <- file.path(config_dir, 'config')
-    log_file <- get_log_file(bioradar_dir, 'logs_vp', 'vp')
+    log_file <- get_log_file(bioradar_dir, 'logs_vid', 'vid')
 
     yaml_file <- file.path(dir_config, 'config_datasets.yaml')
     if(!file.exists(yaml_file)){
@@ -199,11 +205,11 @@ process_rwanda_vps <- function(
 
     ret <- foreach::foreach(
             jlp = seq_along(radar_files),
-            .export = c('wrapper_rwanda_vp', 'format_out_msg'),
+            .export = c('wrapper_rwanda_vid', 'format_out_msg'),
             .combine = 'c'
         ) %dopar% {
         ret <- try(
-            wrapper_rwanda_vp(
+            wrapper_rwanda_vid(
                 radar_files[jlp], bioradar_dir, radar_id
             ),
             silent = TRUE

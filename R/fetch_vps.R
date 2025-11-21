@@ -9,7 +9,8 @@ get_vp_db <- function(config_dir, query){
         fetch_vp(con,
             query$time,
             query$species,
-            query$radarID
+            query$radarID,
+            3600
         ),
         silent = TRUE 
     )
@@ -52,7 +53,9 @@ get_vpts_db <- function(config_dir, query){
     return(ret)
 }
 
-fetch_vp <- function(con, time, species, radar_id){
+fetch_vp <- function(
+    con, time, species, radar_id, window
+){
     radar <- DBI::dbGetQuery(con,
         "SELECT * FROM radar_table WHERE id=$1;",
         params = list(radar_id)
@@ -65,8 +68,8 @@ fetch_vp <- function(con, time, species, radar_id){
 
     t_frmt <- '%Y-%m-%d %H:%M:%S'
     t_time <- as.POSIXct(time, tz = 'UTC')
-    time1 <- format(t_time - 3600, t_frmt)
-    time2 <- format(t_time + 3600, t_frmt)
+    time1 <- format(t_time - window, t_frmt)
+    time2 <- format(t_time + window, t_frmt)
     params <- list(radar_id, time1, time2, time)
     vp_p <- DBI::dbGetQuery(con,
         "SELECT * FROM vp_polar

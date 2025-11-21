@@ -91,6 +91,7 @@ extract_filename_dates <- function(filenames, fileformat){
             res <- res[!duplicated(res)]
             res <- double_backslash_non_alnum(res)
             pattern <- paste0(res, collapse = '|')
+            pattern <- gsub('\\*', '.+', pattern)
             ret <- gsub(pattern, '', filenames)
         }
     }

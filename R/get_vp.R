@@ -36,7 +36,7 @@ get_vp_image <- function(config_dir, query){
 
     pngfile <- tempfile()
     on.exit(unlink(pngfile))
-    grDevices::png(pngfile, width = 450, height = 900)
+    grDevices::png(pngfile, width = 450, height = 700)
     op <- graphics::par(mar = c(5.1, 5.1, 2.1, 2.1))
     plot(
         ret$vp, quantity = query$parameter,

@@ -107,6 +107,7 @@ get_vpts_image <- function(config_dir, query){
     pngfile <- tempfile()
     on.exit(unlink(pngfile))
     grDevices::png(pngfile, width = 900, height = 450)
+    op <- graphics::par(mar = c(5.1, 5.1, 5.1, 1.1))
     plot(
         vpts, quantity = query$parameter,
         xlab = '', ylab = 'Altitude [m]',
@@ -114,6 +115,7 @@ get_vpts_image <- function(config_dir, query){
         cex.lab = 1.5, cex.axis = 1.2,
         cex.main = 1.5, font.main = 2
     )
+    graphics::par(op)
     grDevices::dev.off()
 
     bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])
@@ -168,6 +170,7 @@ get_vtip_image <- function(config_dir, query){
     pngfile <- tempfile()
     on.exit(unlink(pngfile))
     grDevices::png(pngfile, width = 900, height = 450)
+    op <- graphics::par(mar = c(5.1, 5.1, 5.1, 2.1))
     plot(
         vpi, quantity = query$parameter,
         night_shade = TRUE, xlab = '',
@@ -175,6 +178,7 @@ get_vtip_image <- function(config_dir, query){
         cex.main = 1.5, font.main = 2
     )
     graphics::grid()
+    graphics::par(op)
     grDevices::dev.off()
 
     bin_data <- readBin(pngfile, 'raw', file.info(pngfile)[1, 'size'])

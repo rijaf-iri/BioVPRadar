@@ -79,7 +79,8 @@ wrapper_rwanda_vid <- function(
     vid_info <- vid_info$vertical$sevip
 
     date_dir <- format(pvol$datetime, vid_info$format_dir)
-    vid_dir <- file.path(vid_info$dir, date_dir)
+    radar_dir <- paste0('radar_', radar_id)
+    vid_dir <- file.path(vid_info$dir, radar_dir, date_dir)
     if(!dir.exists(vid_dir)){
         dir.create(
             vid_dir, recursive = TRUE, showWarnings = FALSE

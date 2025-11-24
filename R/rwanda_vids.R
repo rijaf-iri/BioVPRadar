@@ -24,21 +24,20 @@ production_rwanda_vid <- function(bioradar_dir, radar_id = 1){
     }
     radar_info <- yaml::read_yaml(yaml_file)
 
-    # con <- bioDBRadar(config_dir)
-    # if(is.null(con)){
-    #     msg <- 'Unable to connect to BioDBRadar.'
-    #     format_out_msg(msg, log_file)
-    #     return(-1)
-    # }
-    # sqlCmd <- sprintf(
-    #     "SELECT end_time FROM vp_timerange WHERE radar_id=%s",
-    #     radar_id
-    # )
-    # last <- DBI::dbGetQuery(con, sqlCmd)
-    # closeDB(con)
-
-    # get last from zarr
-    last <- list(end_time = as.POSIXct('2025-10-28 10:00:00', tz = 'UTC'))
+    con <- bioDBRadar(config_dir)
+    if(is.null(con)){
+        msg <- 'Unable to connect to BioDBRadar.'
+        format_out_msg(msg, log_file)
+        return(-1)
+    }
+    sqlCmd <- sprintf(
+        "SELECT end_time
+         FROM vid_timerange
+         WHERE radar_id=%s",
+        radar_id
+    )
+    last <- DBI::dbGetQuery(con, sqlCmd)
+    closeDB(con)
 
     start_time <- format(
         last$end_time + 1, '%Y-%m-%d %H:%M:%S'

@@ -173,7 +173,7 @@ get_vtip_image <- function(config_dir, query){
     op <- graphics::par(mar = c(5.1, 5.1, 5.1, 2.1))
     plot(
         vpi, quantity = query$parameter,
-        night_shade = TRUE, xlab = '',
+        night_shade = TRUE, xlab = 'Time (UTC)',
         cex.lab = 1.5, cex.axis = 1.2,
         cex.main = 1.5, font.main = 2
     )

@@ -124,7 +124,7 @@ wrapper_rwanda_vid <- function(
         # -----------------------------------
 
         write_vid_to_nc(
-            ppi, pvol$datetime, nc_file, vid_info$missval
+            ppi, pvol$datetime, nc_file, vid_info
         )
 
         # -----------------------------------
@@ -135,7 +135,7 @@ wrapper_rwanda_vid <- function(
     return(0)
 }
 
-write_vid_to_nc <- function(ppi, datetime, nc_file, missval){
+write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
     parameters <- list(
         list(parameter = 'VID', name = 'Vertically integrated density', units = '#/km2'),
         list(parameter = 'VIR', name = 'Vertically integrated reflectivity', units = 'cm2/km2'),
@@ -152,22 +152,22 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, missval){
         y <- sort(unique(xy[, 2]))
         z <- raster::as.matrix(rc)
         z <- t(z)[, rev(seq_along(y))]
-        z[is.na(z)] <- missval
+        z[is.na(z)] <- vid_info$missval
         t <- as.numeric(datetime)
         dim(z) <- c(dim(z), 1)
         list(x = x, y = y, z = z, t = t)
     })
 
     dx <- ncdf4::ncdim_def(
-            'lon', 'degreeE', data[[1]]$x,
+            vid_info$lon, 'degreeE', data[[1]]$x,
             longname = 'Longitude'
         )
     dy <- ncdf4::ncdim_def(
-            'lat', 'degreeN', data[[1]]$y,
+            vid_info$lat, 'degreeN', data[[1]]$y,
             longname = 'Latitude'
         )
     dt <- ncdf4::ncdim_def(
-            'time', 'seconds since 1970-01-01 00:00:00',
+            vid_info$time, 'seconds since 1970-01-01 00:00:00',
             data[[1]]$t, longname = 'Time'
         )
     dxyt <- list(dx, dy, dt)
@@ -175,7 +175,8 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, missval){
     ncgrd <- lapply(parameters, function(p){
         ncdf4::ncvar_def(
             tolower(p$parameter), p$units, dxyt,
-            missval, p$name, 'float', compression = 9
+            vid_info$missval, p$name,
+            'float', compression = 9
         )
     })
 
@@ -190,6 +191,10 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, missval){
 convert_ppi_wgs84 <- function(ppi, param){
     wgs84 <- sp::CRS(SRS_string = sf::st_crs(4326)$wkt)
     data <- do.call(function(y) ppi$data[y], list(param))
+    miss <- is.nan(data@data[, param]) |
+            is.na(data@data[, param]) |
+            is.infinite(data@data[, param])
+    data@data[miss, param] <- 0
     bbox <- sp::spTransform(
                 sp::SpatialPoints(
                     t(data@bbox),
@@ -202,12 +207,15 @@ convert_ppi_wgs84 <- function(ppi, param){
                         nrow = data@grid@cells.dim[2] * .9,
                         crs = sp::CRS(sp::proj4string(bbox))
                       )
-    data <- as.data.frame(
-        sp::spTransform(
-            methods::as(data, 'SpatialPointsDataFrame'),
-            wgs84)
-        )
-    r_data <- raster::rasterize(data[, 2:3], r_data, data[, 1])
+    data <- methods::as(data, 'SpatialPointsDataFrame')
+    data <- sp::spTransform(data, wgs84)
+    data <- as.data.frame(data)
+    data[miss, param] <- NA
+    na_rm <- if(all(is.na(data[, param]))) FALSE else TRUE
+    r_data <- raster::rasterize(
+        data[, 2:3], r_data, data[, 1],
+        na.rm = na_rm
+    )
     names(r_data) <- param
 
     zlim <- switch(tolower(param), 
@@ -217,8 +225,8 @@ convert_ppi_wgs84 <- function(ppi, param){
                    'eta_sum' = c(0, 2000),
                    'eta_sum_expected' = c(0, 2000),
                    'overlap' = c(0, 1))
-    r_data[r_data < zlim[1]] <- zlim[1]
-    r_data[r_data > zlim[2]] <- zlim[2]
+    r_data[!is.na(r_data) & r_data < zlim[1]] <- zlim[1]
+    r_data[!is.na(r_data) & r_data > zlim[2]] <- zlim[2]
 
     return(r_data)
 }

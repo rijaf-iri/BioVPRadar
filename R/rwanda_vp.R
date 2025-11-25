@@ -79,7 +79,7 @@ wrapper_rwanda_vp <- function(
     bioRad::write_pvolfile(
         pvol, file = tmp_pvol_file, overwrite = TRUE
     )
-
+    rm(pvol)
     # -----------------------------------
     cat(paste('Finish | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
     # -----------------------------------
@@ -159,6 +159,9 @@ wrapper_rwanda_vp <- function(
     }
 
     update_vp_timerange(con, radar_id, vp$datetime[1])
+
+    gc()
+    return(0)
 }
 
 populate_vp_polar <- function(con, data){

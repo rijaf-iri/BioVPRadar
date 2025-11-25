@@ -131,7 +131,8 @@ wrapper_rwanda_vid <- function(
         cat(paste('Finish | write nc vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
     }
-
+    rm(pvol)
+    gc()
     return(0)
 }
 
@@ -184,7 +185,8 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
     for(j in seq_along(ncgrd))
         ncdf4::ncvar_put(nc, ncgrd[[j]], data[[j]]$z)
     ncdf4::nc_close(nc)
-
+    rm(ppi, data)
+    gc()
     return(0)
 }
 
@@ -217,7 +219,7 @@ convert_ppi_wgs84 <- function(ppi, param){
         na.rm = na_rm
     )
     names(r_data) <- param
-
+    rm(data)
     zlim <- switch(tolower(param), 
                    'vid' = c(0, 200),
                    'vir' = c(0, 2000),
@@ -227,6 +229,6 @@ convert_ppi_wgs84 <- function(ppi, param){
                    'overlap' = c(0, 1))
     r_data[!is.na(r_data) & r_data < zlim[1]] <- zlim[1]
     r_data[!is.na(r_data) & r_data > zlim[2]] <- zlim[2]
-
+    gc()
     return(r_data)
 }

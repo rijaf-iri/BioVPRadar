@@ -61,9 +61,9 @@ production_rwanda_vid <- function(bioradar_dir, radar_id = 1){
         radar_info$radar$polar$dir, radar_files
     )
 
-    klust <- parallel::makeCluster(5)
+    klust <- parallel::makeCluster(3)
     doSNOW::registerDoSNOW(klust)
-    if(length(radar_files) >= 5){
+    if(length(radar_files) >= 6){
         `%dopar%` <- foreach::`%dopar%`
     }else{
         `%dopar%` <- foreach::`%do%`
@@ -198,7 +198,7 @@ process_rwanda_vids <- function(
         radar_files <- rev(radar_files)
     }
 
-    klust <- parallel::makeCluster(5)
+    klust <- parallel::makeCluster(3)
     doSNOW::registerDoSNOW(klust)
     `%dopar%` <- foreach::`%dopar%`
 

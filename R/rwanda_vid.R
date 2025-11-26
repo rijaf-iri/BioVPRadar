@@ -130,6 +130,7 @@ wrapper_rwanda_vid <- function(
         # -----------------------------------
         cat(paste('Finish | write nc vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
         # -----------------------------------
+        rm(ppi)
     }
     rm(pvol)
     gc()
@@ -138,38 +139,47 @@ wrapper_rwanda_vid <- function(
 
 write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
     parameters <- list(
-        list(parameter = 'VID', name = 'Vertically integrated density', units = '#/km2'),
-        list(parameter = 'VIR', name = 'Vertically integrated reflectivity', units = 'cm2/km2'),
-        list(parameter = 'eta_sum', name = 'Sum of observed linear reflectivities', units = 'cm2/km3'),
-        list(parameter = 'eta_sum_expected', name = 'Sum of expected linear reflectivities', units = 'cm2/km3'),
-        list(parameter = 'R', name = 'Spatial adjustment factor', units = ''),
-        list(parameter = 'overlap', name = 'Distribution overlap', units = '')
+        list(parameter = 'VID', units = '#/km2',
+             name = 'Vertically integrated density',
+             zlim = c(0, 200)),
+        list(parameter = 'VIR', units = 'cm2/km2',
+             name = 'Vertically integrated reflectivity',
+             zlim = c(0, 2000)),
+        list(parameter = 'eta_sum', units = 'cm2/km3',
+             name = 'Sum of observed linear reflectivities',
+             zlim = c(0, 2000)),
+        list(parameter = 'eta_sum_expected', units = 'cm2/km3',
+             name = 'Sum of expected linear reflectivities',
+             zlim = c(0, 2000)),
+        list(parameter = 'R', units = '',
+             name = 'Spatial adjustment factor',
+             zlim = c(0, 5)),
+        list(parameter = 'overlap', units = '',
+             name = 'Distribution overlap',
+             zlim = c(0, 1))
     )
-    params <- sapply(parameters, '[[', 'parameter')
-    data <- lapply(params, function(param){
-        rc <- convert_ppi_wgs84(ppi, param)
-        xy <- sp::coordinates(rc)
-        x <- sort(unique(xy[, 1]))
-        y <- sort(unique(xy[, 2]))
-        z <- raster::as.matrix(rc)
-        z <- t(z)[, rev(seq_along(y))]
-        z[is.na(z)] <- vid_info$missval
-        t <- as.numeric(datetime)
-        dim(z) <- c(dim(z), 1)
-        list(x = x, y = y, z = z, t = t)
-    })
+
+    r_grd <- create_longlat_wgs84(ppi$data['overlap'])
+    xy_crd <- sp::coordinates(r_grd)
+    x_crd <- sort(unique(xy_crd[, 1]))
+    y_crd <- sort(unique(xy_crd[, 2]))
+    nx <- length(x_crd)
+    ny <- length(y_crd)
+    oy <- rev(seq_along(y_crd))
 
     dx <- ncdf4::ncdim_def(
-            vid_info$lon, 'degreeE', data[[1]]$x,
+            vid_info$lon, 'degree_east', x_crd,
             longname = 'Longitude'
         )
     dy <- ncdf4::ncdim_def(
-            vid_info$lat, 'degreeN', data[[1]]$y,
+            vid_info$lat, 'degree_north', y_crd,
             longname = 'Latitude'
         )
     dt <- ncdf4::ncdim_def(
-            vid_info$time, 'seconds since 1970-01-01 00:00:00',
-            data[[1]]$t, longname = 'Time'
+            vid_info$time,
+            'seconds since 1970-01-01 00:00:00',
+            as.numeric(datetime),
+            longname = 'Time'
         )
     dxyt <- list(dx, dy, dt)
 
@@ -182,53 +192,32 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
     })
 
     nc <- ncdf4::nc_create(nc_file, ncgrd)
-    for(j in seq_along(ncgrd))
-        ncdf4::ncvar_put(nc, ncgrd[[j]], data[[j]]$z)
+    for(j in seq_along(parameters)){
+        param <- parameters[[j]]$parameter
+        z <- ppi$data@data[[param]]
+        z[is.nan(z) | is.infinite(z)] <- NA
+        zlim <- parameters[[j]]$zlim
+        z[!is.na(z) & z < zlim[1]] <- zlim[1]
+        z[!is.na(z) & z > zlim[2]] <- zlim[2]
+        z[is.na(z)] <- vid_info$missval
+        z <- matrix(z, nx, ny)
+        z <- z[, oy]
+        dim(z) <- c(dim(z), 1)
+        ncdf4::ncvar_put(nc, ncgrd[[j]], z)
+    }
     ncdf4::nc_close(nc)
-    rm(ppi, data)
     gc()
     return(0)
 }
 
-convert_ppi_wgs84 <- function(ppi, param){
-    wgs84 <- sp::CRS(SRS_string = sf::st_crs(4326)$wkt)
-    data <- do.call(function(y) ppi$data[y], list(param))
-    miss <- is.nan(data@data[, param]) |
-            is.na(data@data[, param]) |
-            is.infinite(data@data[, param])
-    data@data[miss, param] <- 0
-    bbox <- sp::spTransform(
-                sp::SpatialPoints(
-                    t(data@bbox),
-                    proj4string = data@proj4string
-                ),
-                wgs84
-            )
-    r_data <- raster::raster(raster::extent(bbox),
-                        ncol = data@grid@cells.dim[1] * .9,
-                        nrow = data@grid@cells.dim[2] * .9,
-                        crs = sp::CRS(sp::proj4string(bbox))
-                      )
-    data <- methods::as(data, 'SpatialPointsDataFrame')
-    data <- sp::spTransform(data, wgs84)
-    data <- as.data.frame(data)
-    data[miss, param] <- NA
-    na_rm <- if(all(is.na(data[, param]))) FALSE else TRUE
-    r_data <- raster::rasterize(
-        data[, 2:3], r_data, data[, 1],
-        na.rm = na_rm
+create_longlat_wgs84 <- function(sgdf){
+    crs_str <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+    g_data <- sp::spTransform(sgdf, sp::CRS(crs_str))
+    r_grd <- raster::raster(
+        raster::extent(g_data),
+        ncol = sgdf@grid@cells.dim[1],
+        nrow = sgdf@grid@cells.dim[2],
+        crs = raster::crs(g_data)
     )
-    names(r_data) <- param
-    rm(data)
-    zlim <- switch(tolower(param), 
-                   'vid' = c(0, 200),
-                   'vir' = c(0, 2000),
-                   'r' = c(0, 5),
-                   'eta_sum' = c(0, 2000),
-                   'eta_sum_expected' = c(0, 2000),
-                   'overlap' = c(0, 1))
-    r_data[!is.na(r_data) & r_data < zlim[1]] <- zlim[1]
-    r_data[!is.na(r_data) & r_data > zlim[2]] <- zlim[2]
-    gc()
-    return(r_data)
+    return(r_grd)
 }

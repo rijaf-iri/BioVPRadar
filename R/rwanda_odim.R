@@ -50,6 +50,7 @@ rwanda_read_pvol <- function(
             filter_non_biological(pvol)
         )
     }
+    gc()
     return(pvol)
 }
 
@@ -118,5 +119,6 @@ filter_non_biological <- function(pvol){
             c(is.na(DBZH)), NA, c(VRADH)
         )
     )
+    gc()
     return(pvol)
 }

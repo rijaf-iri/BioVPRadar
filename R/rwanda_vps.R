@@ -67,9 +67,7 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     }
 
     ret <- foreach::foreach(
-            jlp = seq_along(radar_files),
-            .export = c('wrapper_rwanda_vp', 'format_out_msg'),
-            .combine = 'c'
+            jlp = seq_along(radar_files)
         ) %dopar% {
         ret <- try(
             wrapper_rwanda_vp(
@@ -198,9 +196,7 @@ process_rwanda_vps <- function(
     `%dopar%` <- foreach::`%dopar%`
 
     ret <- foreach::foreach(
-            jlp = seq_along(radar_files),
-            .export = c('wrapper_rwanda_vp', 'format_out_msg'),
-            .combine = 'c'
+            jlp = seq_along(radar_files)
         ) %dopar% {
         ret <- try(
             wrapper_rwanda_vp(

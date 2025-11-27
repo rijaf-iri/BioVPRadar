@@ -204,8 +204,10 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
         z <- z[, oy]
         dim(z) <- c(dim(z), 1)
         ncdf4::ncvar_put(nc, ncgrd[[j]], z)
+        rm(z)
     }
     ncdf4::nc_close(nc)
+    rm(r_grd, xy_crd)
     gc()
     return(0)
 }
@@ -219,5 +221,6 @@ create_longlat_wgs84 <- function(sgdf){
         nrow = sgdf@grid@cells.dim[2],
         crs = raster::crs(g_data)
     )
+    rm(g_data)
     return(r_grd)
 }

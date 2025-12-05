@@ -32,7 +32,7 @@ production_rwanda_vid <- function(bioradar_dir, radar_id = 1){
     }
     sqlCmd <- sprintf(
         "SELECT end_time
-         FROM vid_timerange
+         FROM vidnc_timerange
          WHERE radar_id=%s",
         radar_id
     )

@@ -52,6 +52,7 @@ create_bioDBRadar <- function(config_dir){
     create_vp_species(con, 'vp_bird')
     create_vp_species(con, 'vp_insect')
     create_vp_timerange(con)
+    create_vidnc_timerange(con)
     create_vid_timerange(con)
     create_rgrid_timerange(con)
     create_rpolar_timerange(con)
@@ -108,8 +109,8 @@ verify_bioDBRadar <- function(config_dir) {
 
     expected_tables <- c(
         'radar_table', 'vp_polar',
-        'vp_bird', 'vp_insect',
-        'vp_timerange', 'vid_timerange',
+        'vp_bird', 'vp_insect', 'vp_timerange',
+        'vidnc_timerange', 'vid_timerange',
         'rgrid_timerange', 'rpolar_timerange',
         'biometeo_timerange', 'bioclass_timerange'
     )
@@ -231,6 +232,17 @@ create_vp_species <- function(con, table_name){
 create_vp_timerange <- function(con){
     createDBTable(
         con, 'vp_timerange', FALSE,
+        'radar_id INT NOT NULL',
+        'start_time TIMESTAMP NOT NULL',
+        'end_time TIMESTAMP NOT NULL'
+    )
+
+    return(0)
+}
+
+create_vidnc_timerange <- function(con){
+    createDBTable(
+        con, 'vidnc_timerange', FALSE,
         'radar_id INT NOT NULL',
         'start_time TIMESTAMP NOT NULL',
         'end_time TIMESTAMP NOT NULL'

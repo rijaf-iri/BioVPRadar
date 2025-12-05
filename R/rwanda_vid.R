@@ -132,6 +132,11 @@ wrapper_rwanda_vid <- function(
         # -----------------------------------
         rm(ppi)
     }
+
+    updateTimeRangeTable(
+        con, 'vidnc_timerange', radar_id, pvol$datetime
+    )
+
     rm(pvol)
     gc()
     return(0)
@@ -207,6 +212,7 @@ write_vid_to_nc <- function(ppi, datetime, nc_file, vid_info){
         rm(z)
     }
     ncdf4::nc_close(nc)
+
     rm(r_grd, xy_crd)
     gc()
     return(0)

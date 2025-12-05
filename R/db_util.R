@@ -60,3 +60,45 @@ createDBTable <- function(con, table_name, cascade, ...){
 
     return(0)
 }
+
+updateTimeRangeTable <- function(
+    con, table_name, radar_id, date_time
+){
+    sqlCmd <- sprintf(
+        "SELECT * FROM %s WHERE radar_id=%s",
+        table_name, radar_id
+    )
+    time_range <- DBI::dbGetQuery(con, sqlCmd)
+    if(nrow(time_range) > 0){
+        update <- FALSE
+        if(date_time < time_range$start_time){
+            sqlCmd <- sprintf(
+                "UPDATE %s SET start_time=$1 WHERE radar_id=$2;",
+                table_name
+            )
+            update <- TRUE
+        }
+        if(date_time > time_range$end_time){
+            sqlCmd <- sprintf(
+                "UPDATE %s SET end_time=$1 WHERE radar_id=$2;",
+                table_name
+            )
+            update <- TRUE
+        }
+        if(update){
+            params <- list(date_time, radar_id)
+            DBI::dbExecute(con, sqlCmd, params = params)
+        }
+    }else{
+        sqlCmd <- sprintf(
+            "INSERT INTO %s (radar_id, start_time, end_time) VALUES ($1, $2, $3);",
+            table_name
+        )
+        params <- list(
+            radar_id, date_time, date_time
+        )
+        DBI::dbExecute(con, sqlCmd, params = params)
+    }
+
+    return(0)
+}

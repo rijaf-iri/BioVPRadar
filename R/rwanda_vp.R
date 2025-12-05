@@ -158,7 +158,9 @@ wrapper_rwanda_vp <- function(
         # -----------------------------------
     }
 
-    update_vp_timerange(con, radar_id, vp$datetime[1])
+    updateTimeRangeTable(
+        con, 'vp_timerange', radar_id, vp$datetime[1]
+    )
 
     gc()
     return(0)
@@ -269,48 +271,4 @@ populate_vp_species <- function(con, data, table_name){
     }
 
     return(list(status = 0))
-}
-
-update_vp_timerange <- function(con, radar_id, date_time){
-    sqlCmd <- sprintf(
-        "SELECT * FROM vp_timerange WHERE radar_id=%s",
-        radar_id
-    )
-    time_range <- DBI::dbGetQuery(con, sqlCmd)
-    if(nrow(time_range) > 0){
-        update <- FALSE
-        if(date_time < time_range$start_time){
-            sqlCmd <- "
-                UPDATE vp_timerange
-                SET start_time = $1
-                WHERE radar_id = $2;
-               "
-            update <- TRUE
-        }
-        if(date_time > time_range$end_time){
-            sqlCmd <- "
-                UPDATE vp_timerange
-                SET end_time = $1
-                WHERE radar_id = $2;
-               "
-            update <- TRUE
-        }
-        if(update){
-            params <- list(date_time, radar_id)
-            DBI::dbExecute(con, sqlCmd, params = params)
-        }
-    }else{
-        sqlCmd <- "
-            INSERT INTO vp_timerange 
-              (radar_id, start_time, end_time)
-            VALUES 
-              ($1, $2, $3);
-          "
-        params <- list(
-            radar_id, date_time, date_time
-        )
-        DBI::dbExecute(con, sqlCmd, params = params)
-    }
-
-    return(0)
 }

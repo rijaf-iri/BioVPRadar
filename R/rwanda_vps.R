@@ -42,8 +42,10 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     now <- Sys.time()
     end_time <- format(now, '%Y-%m-%d %H:%M:%S')
 
+    polar_id <- paste0('polar_', radar_id)
+    radar_polar <- radar_info$radar[[polar_id]]
     radar_files <- get_data_files_list(
-        radar_info$radar$polar, start_time, end_time
+        radar_polar, start_time, end_time
     )
 
     if(is.null(radar_files)){
@@ -55,7 +57,7 @@ production_rwanda_vp <- function(bioradar_dir, radar_id = 1){
     })
     radar_files <- do.call(c, radar_files)
     radar_files <- file.path(
-        radar_info$radar$polar$dir, radar_files
+        radar_polar$dir, radar_files
     )
 
     klust <- parallel::makeCluster(5)
@@ -113,9 +115,10 @@ process_rwanda_vp <- function(bioradar_dir, time, radar_id = 1){
         return(-1)
     }
     radar_info <- yaml::read_yaml(yaml_file)
-    radar_file <- get_data_file_path(
-        radar_info$radar$polar, time
-    )
+    polar_id <- paste0('polar_', radar_id)
+    radar_polar <- radar_info$radar[[polar_id]]
+    radar_file <- get_data_file_path(radar_polar, time)
+
     if(is.null(radar_file)){
         msg <- paste('No file found for time close to', time)
         format_out_msg(msg, log_file)
@@ -167,9 +170,11 @@ process_rwanda_vps <- function(
         return(-1)
     }
     radar_info <- yaml::read_yaml(yaml_file)
+    polar_id <- paste0('polar_', radar_id)
+    radar_polar <- radar_info$radar[[polar_id]]
 
     radar_files <- get_data_files_list(
-        radar_info$radar$polar, start_time, end_time
+        radar_polar, start_time, end_time
     )
     if(is.null(radar_files)){
         msg <- paste(
@@ -185,7 +190,7 @@ process_rwanda_vps <- function(
     })
     radar_files <- do.call(c, radar_files)
     radar_files <- file.path(
-        radar_info$radar$polar$dir, radar_files
+        radar_polar$dir, radar_files
     )
     if(reverse){
         radar_files <- rev(radar_files)

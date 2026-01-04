@@ -67,11 +67,6 @@ wrapper_rwanda_vp <- function(
         format_out_msg(msg, log_file)
         return(-1)
     }
-
-    # -----------------------------------
-    cat(paste('Start | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-    # -----------------------------------
-
     rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
     args <- c(pvol_file = radar_file, rwd_wrong_swp)
     pvol <- do.call(rwanda_read_pvol, args)
@@ -80,9 +75,6 @@ wrapper_rwanda_vp <- function(
         pvol, file = tmp_pvol_file, overwrite = TRUE
     )
     rm(pvol)
-    # -----------------------------------
-    cat(paste('Finish | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-    # -----------------------------------
 
     config_rcs <- jsonlite::fromJSON(rcs_file)
     config_user <- jsonlite::fromJSON(vp_conf_file)
@@ -92,11 +84,6 @@ wrapper_rwanda_vp <- function(
     for(species in names(config_rcs)){
         config_user$birdRadarCrossSection <- config_rcs[[species]]
         config_species <- assign_lists(config_user, config)
-
-        # -----------------------------------
-        cat(paste('Start | compute vp_', species, '|', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         tmp_vp_file <- tempfile(fileext = '.h5')
         vol2birdR::vol2bird(
             file = tmp_pvol_file,
@@ -108,15 +95,7 @@ wrapper_rwanda_vp <- function(
         vp <- bioRad::read_vpts(tmp_vp_file)
         vp <- as.data.frame(vp)
 
-        # -----------------------------------
-        cat(paste('Finish | compute vp_', species, '|', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         if(is.null(polar_id)){
-            # -----------------------------------
-            cat(paste('Start | populate vp_polar |', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-            # -----------------------------------
-
             vp_polar <- list(
                 radar_id = radar_id,
                 date_time = vp$datetime[1],
@@ -133,15 +112,7 @@ wrapper_rwanda_vp <- function(
                 return(-1)
             }
             polar_id <- ret_vp_polar$id
-
-            # -----------------------------------
-            cat(paste('Finish | populate vp_polar |', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-            # -----------------------------------
         }
-
-        # -----------------------------------
-        cat(paste('Start | populate vp_', species, '|', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
 
         vp_species <- cbind(polar_id = polar_id, vp[, 3:18])
         table_name <- paste0('vp_', species)
@@ -152,10 +123,6 @@ wrapper_rwanda_vp <- function(
             format_out_msg(ret_vp_species$msg, log_file)
             return(-1)
         }
-
-        # -----------------------------------
-        cat(paste('Finish | populate vp_', species, '|', vp$datetime[1], '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
     }
 
     updateTimeRangeTable(

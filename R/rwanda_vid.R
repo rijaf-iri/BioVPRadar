@@ -62,17 +62,9 @@ wrapper_rwanda_vid <- function(
         return(-1)
     }
 
-    # -----------------------------------
-    cat(paste('Start | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-    # -----------------------------------
-
     rwd_wrong_swp <- jsonlite::fromJSON(sweep_file)
     args <- c(pvol_file = radar_file, rwd_wrong_swp)
     pvol <- do.call(rwanda_read_pvol, args)
-
-    # -----------------------------------
-    cat(paste('Finish | process pvol |', basename(radar_file), '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-    # -----------------------------------
 
     vid_conf <- yaml::read_yaml(vid_file)
     vid_info <- yaml::read_yaml(dataset_file)
@@ -90,46 +82,19 @@ wrapper_rwanda_vid <- function(
     time <- format(pvol$datetime, '%Y-%m-%d %H:%M:%S')
 
     for(species in c('bird', 'insect')){
-        # -----------------------------------
-        cat(paste('Start | fetch vp_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         vp <- fetch_vp(con, time, species, radar_id, 300)
-
-        # -----------------------------------
-        cat(paste('Finish | fetch vp_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         if(vp$status == -1) return(-1)
-
-        # -----------------------------------
-        cat(paste('Start | compute vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
 
         ppi <- do.call(
             bioRad::integrate_to_ppi,
             c(list(pvol = pvol, vp = vp$vp), vid_conf)
         )
-
-        # -----------------------------------
-        cat(paste('Finish | compute vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         vid_file <- sub('\\*', species, vid_info$format_file)
         vid_file <- format(pvol$datetime, vid_file)
         nc_file <- file.path(vid_dir, vid_file)
-
-        # -----------------------------------
-        cat(paste('Start | write nc vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
-
         write_vid_to_nc(
             ppi, pvol$datetime, nc_file, vid_info
         )
-
-        # -----------------------------------
-        cat(paste('Finish | write nc vid_', species, '|', time, '|', Sys.time(), '\n'), file = paste0(log_file, '.test'), append = TRUE)
-        # -----------------------------------
         rm(ppi)
     }
 
